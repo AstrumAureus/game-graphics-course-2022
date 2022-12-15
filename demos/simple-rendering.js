@@ -23,7 +23,7 @@ import {mat4, vec3, vec4} from "../node_modules/gl-matrix/esm/index.js";
 //                  |/             |/
 //     -.5 -.5 .5   *--------------*  .5 -.5 .5
 
-import {positions, normals, indices} from "../blender/lamp.js"
+import {positions, normals, indices} from "../blender/cube.js"
 
 // ******************************************************
 // **               Geometry processing                **
@@ -46,9 +46,9 @@ let vertexShader = `
     
     void main()
     {
-        gl_Position = modelViewProjectionMatrix * vec4(position * sin(time), 1.0);
-        vec3 viewNormal = (modelViewMatrix * vec4(normal , 0.0)).xyz;
-        color = mix(bgColor * sin(time), fgColor, viewNormal.y) + pow(viewNormal.z, 2.0);
+        gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
+        vec3 viewNormal = (modelViewMatrix * vec4(normal, 0.0)).xyz;
+        color = mix(bgColor * 0.8, fgColor, viewNormal.z) + pow(viewNormal.z, 20.0);
     }
 `;
 
@@ -68,7 +68,7 @@ let fragmentShader = `
     
     void main()
     {
-        outColor = color ;
+        outColor = color;
     }
 `;
 
@@ -80,9 +80,9 @@ let bgColor = vec4.fromValues(1.0, 0.2, 0.3, 1.0);
 let fgColor = vec4.fromValues(1.0, 0.9, 0.5, 1.0);
 
 
-app.clearColor(bgColor[2.2], bgColor[1], bgColor[2], bgColor[0])
+app.clearColor(bgColor[0], bgColor[1], bgColor[2], bgColor[3])
     .enable(PicoGL.DEPTH_TEST)
-    //.enable(PicoGL.CULL_FACE);
+    .enable(PicoGL.CULL_FACE);
 
 let program = app.createProgram(vertexShader.trim(), fragmentShader.trim());
 
@@ -111,12 +111,12 @@ let startTime = new Date().getTime() / 1000;
 function draw() {
     let time = new Date().getTime() / 1000 - startTime;
 
-    mat4.perspective(projMatrix, Math.PI / 6, app.width / app.height, 0.1, 100.0);
-    mat4.lookAt(viewMatrix, vec3.fromValues(2, 0, 2), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
+    mat4.perspective(projMatrix, Math.PI / 4, app.width / app.height, 0.1, 100.0);
+    mat4.lookAt(viewMatrix, vec3.fromValues(3, 0, 2), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0));
     mat4.multiply(viewProjMatrix, projMatrix, viewMatrix);
 
-    mat4.fromXRotation(rotateXMatrix, time * 0.6136);
-    mat4.fromYRotation(rotateYMatrix, time * 0.5235);
+    mat4.fromXRotation(rotateXMatrix, time * 0.1136);
+    mat4.fromYRotation(rotateYMatrix, time * 0.2235);
     mat4.multiply(modelMatrix, rotateXMatrix, rotateYMatrix);
 
     mat4.multiply(modelViewMatrix, viewMatrix, modelMatrix);
@@ -130,6 +130,5 @@ function draw() {
     drawCall.draw();
 
     requestAnimationFrame(draw);
-    
 }
 requestAnimationFrame(draw);
